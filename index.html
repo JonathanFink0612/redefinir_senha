@@ -1,52 +1,122 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Redefinir Senha</title>
+  <meta charset="UTF-8" />
+  <title>Redefinir Senha - Thunder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #mensagem {
+      margin-top: 15px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <h2>Redefinir sua senha</h2>
-  <input type="password" id="novaSenha" placeholder="Nova senha"><br>
-  <input type="password" id="confirmarSenha" placeholder="Confirmar senha"><br>
-  <button onclick="redefinirSenha()">Alterar Senha</button>
-  <p id="mensagem"></p>
+  <div class="container">
+    <h2>Redefinir Senha</h2>
+    <input type="password" id="novaSenha" placeholder="Nova senha" />
+    <input type="password" id="confirmarSenha" placeholder="Confirmar nova senha" />
+    <button onclick="redefinirSenha()">Alterar Senha</button>
+    <p id="mensagem"></p>
+  </div>
 
-  <script>
-    async function redefinirSenha() {
-      const novaSenha = document.getElementById("novaSenha").value;
-      const confirmarSenha = document.getElementById("confirmarSenha").value;
-      const token = window.location.hash.split("access_token=")[1]?.split("&")[0];
+  <script>
+    // Constantes convertidas para JavaScript
+    const SUPABASE_URL = "https://aeogsdzptuphlctfiwbo.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlb2dzZHpwdHVwaGxjdGZpd2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5ODkyNTAsImV4cCI6MjA2NDU2NTI1MH0.E3MaMo196rv1jwTNRITOP6p4Xt4RTfUTaULH1cDwWIk";
 
-      if (!token) {
-        document.getElementById("mensagem").innerText = "Token não encontrado na URL.";
-        return;
-      }
+    async function redefinirSenha() {
+      const novaSenha = document.getElementById("novaSenha").value;
+      const confirmarSenha = document.getElementById("confirmarSenha").value;
+      const mensagem = document.getElementById("mensagem");
 
-      if (novaSenha !== confirmarSenha) {
-        document.getElementById("mensagem").innerText = "As senhas não coincidem.";
-        return;
-      }
+      if (novaSenha !== confirmarSenha) {
+        mensagem.innerText = "As senhas não coincidem.";
+        mensagem.style.color = "red";
+        return;
+      }
 
-      try {
-        const resposta = await fetch("https://<sua-url-do-supabase>.supabase.co/auth/v1/user", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({ password: novaSenha })
-        });
+      const fragmento = window.location.hash;
+      const token = fragmento.match(/access_token=([^&]+)/)?.[1];
 
-        if (resposta.ok) {
-          document.getElementById("mensagem").innerText = "Senha alterada com sucesso!";
-        } else {
-          const erro = await resposta.json();
-          document.getElementById("mensagem").innerText = "Erro: " + erro.message;
-        }
-      } catch (erro) {
-        document.getElementById("mensagem").innerText = "Erro ao conectar: " + erro;
-      }
-    }
-  </script>
+      if (!token) {
+        mensagem.innerText = "Token não encontrado na URL.";
+        mensagem.style.color = "red";
+        return;
+      }
+
+      try {
+        const resposta = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            "apikey": SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({ password: novaSenha })
+        });
+
+        if (resposta.ok) {
+          mensagem.innerText = "Senha alterada com sucesso!";
+          mensagem.style.color = "green";
+        } else {
+          const erro = await resposta.json();
+          mensagem.innerText = "Erro: " + (erro.message || "Erro desconhecido.");
+          mensagem.style.color = "red";
+        }
+      } catch (erro) {
+        mensagem.innerText = "Erro ao se conectar ao servidor.";
+        mensagem.style.color = "red";
+      }
+    }
+  </script>
 </body>
 </html>
