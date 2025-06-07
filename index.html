@@ -135,10 +135,9 @@
       });
 
       if (resposta.ok) {
-        // Remove o formulário e mostra mensagem positiva
-        formulario.style.display = "none";
-        mensagem.innerText = "Senha trocada com sucesso! Você já pode fazer o login.";
-        mensagem.style.color = "green";
+         console.log("foiiii")
+
+        window.location.href = "sucesso.html";
       } else {
         const erro = await resposta.json();
         mensagem.innerText = "Erro: " + (erro.message || "Erro desconhecido.");
