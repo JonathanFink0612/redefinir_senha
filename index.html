@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Redefinir Senha</title>
+</head>
+<body>
+  <h2>Redefinir sua senha</h2>
+  <input type="password" id="novaSenha" placeholder="Nova senha"><br>
+  <input type="password" id="confirmarSenha" placeholder="Confirmar senha"><br>
+  <button onclick="redefinirSenha()">Alterar Senha</button>
+  <p id="mensagem"></p>
+
+  <script>
+    async function redefinirSenha() {
+      const novaSenha = document.getElementById("novaSenha").value;
+      const confirmarSenha = document.getElementById("confirmarSenha").value;
+      const token = window.location.hash.split("access_token=")[1]?.split("&")[0];
+
+      if (!token) {
+        document.getElementById("mensagem").innerText = "Token não encontrado na URL.";
+        return;
+      }
+
+      if (novaSenha !== confirmarSenha) {
+        document.getElementById("mensagem").innerText = "As senhas não coincidem.";
+        return;
+      }
+
+      try {
+        const resposta = await fetch("https://<sua-url-do-supabase>.supabase.co/auth/v1/user", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ password: novaSenha })
+        });
+
+        if (resposta.ok) {
+          document.getElementById("mensagem").innerText = "Senha alterada com sucesso!";
+        } else {
+          const erro = await resposta.json();
+          document.getElementById("mensagem").innerText = "Erro: " + erro.message;
+        }
+      } catch (erro) {
+        document.getElementById("mensagem").innerText = "Erro ao conectar: " + erro;
+      }
+    }
+  </script>
+</body>
+</html>
